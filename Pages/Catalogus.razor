@@ -1,0 +1,282 @@
+@page "/catalogus"
+@using Omnidroid.Resources.Scripts
+@using Omnidroid.Resources.Scripts.Settings
+@using Omnidroid.Resources.Scripts.Default
+<div class="center">
+<h2>Catalogus</h2>
+<p class="accent">@Oversight.Status</p>
+<div hidden="@Interface.Suggestions">
+    @foreach (var suggestion in Gamma.Suggest)
+    {
+        <p>@suggestion.TheSuggestion</p>
+    }
+</div>
+<div hidden="@Interface.Info">
+    <button @onclick="@Interface.Clear">Explanation</button>
+</div>
+<div hidden="@TheList">
+<table>
+    <tr>
+        <th><h3>Natural</h3></th>
+    </tr>
+    <tr>
+        <td @onclick="@Enginery">Enginery</td>
+        <td @onclick="@Chemistry">Chemistry</td>
+        <td @onclick="@Mathematics">Mathematics</td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <th><h3>Social</h3></th>
+    </tr>
+    <tr>
+        <td @onclick="@Pharmacy">Pharmacy</td>
+        <td @onclick="@Sociology">Sociology</td>
+        <td @onclick="@Economics">Economics</td>
+    </tr>
+</table>
+</div>
+<div hidden="@TheCatalogus">
+    <button @onclick="@ToCatalogus">Back</button>
+    <button @onclick="@NewRecord">New</button>
+    <button @onclick="@ImportCatalogus">Import</button>
+    <h3>@Category</h3>
+    <input @bind="@Subject" @bind:event="oninput" disabled="@Edit"/>
+    <select />
+    <input @bind="@Account" @bind:event="oninput" disabled="@Edit" />
+    <textarea @bind="@Abstract" @bind:event="oninput" disabled="@Edit" />
+    <textarea @bind="@Hypothesis" @bind:event="oninput" disabled="@Edit" />
+    <table>
+        @foreach (var content in Delta.Account)
+        {
+            <tr>
+                <td>@content.Time</td>
+                <td>@content.Editor</td>
+            </tr>
+            <tr>
+                <th>@content.Title</th>
+            </tr>
+            <tr>
+                <td>@content.Content</td>
+            </tr>
+        }
+    </table>
+    <input @bind="@Title" @bind:event="oninput"/>
+    <textarea @bind="@Content" @bind:event="oninput"/>
+    <div hidden="@Save">
+        <button @onclick="@Local">Local</button>
+        <button @onclick="@Echelon">Echelon</button>
+    </div>
+    <button @onclick="@Vault">Save</button>
+    <button @onclick="@TheEdit">Edit</button>
+    <button @onclick="@ExportCatalogus">Export</button>
+</div>
+</div>
+
+@code {
+    static public bool TheList { get; set; } = false;
+    static public bool TheCatalogus { get; set; } = true;
+    static public bool Edit { get; set; } = false;
+    static public bool Save { get; set; } = true;
+    static public bool New { get; set; } = true;
+    static public string Category { get; set; } = "";
+    static public string Subject { get; set; } = "";
+    static public string Account { get; set; } = "";
+    static public string Title { get; set; } = "";
+    static public string Abstract { get; set; } = "";
+    static public string Hypothesis { get; set; } = "";
+    static public string Content { get; set; } = "";
+
+    protected override void OnInitialized()
+    {
+        Logbook.TheLogAuthority = "Catalogus";
+    }
+
+    static public void TheEdit()
+    {
+        if (Edit == false)
+        {
+            Edit = true;
+        }
+        else
+        {
+            Edit = false;
+        }
+    }
+
+    static public void ToCatalogus()
+    {
+        TheCatalogus = false;
+        TheList = true;
+        Save = true;
+    }
+
+    static public void Vault()
+    {
+        Gamma.Suggest.Add(new Gamma.Suggestions("Export to \"Local\" to open after exit."));
+        New = false;
+        Category = Delta.Category;
+        Delta.Account.Add(new Delta.Accounts(DateTime.Now, Personalia.Name, Title, Content));
+        Hypothesis = Delta.Hypothesis;
+        Abstract = Delta.Abstract;
+        if (New == true)
+        {
+            Subject = Delta.Subject;
+            Account = Delta.File;
+        }
+    }
+
+    static public void Enginery()
+    {
+        Category = "Enginery";
+        Delta.FileName = "\"Enginery.txt\"";
+    }
+
+    static public void Chemistry()
+    {
+        Category = "Chemistry";
+        Delta.FileName = "\"Chemistry.txt\"";
+    }
+
+    static public void Mathematics()
+    {
+        Category = "Mathematics";
+        Delta.FileName = "\"Mathematics.txt\"";
+    }
+    static public void Pharmacy()
+    {
+        Category = "Pharmacy";
+        Delta.FileName = "\"Pharmacy.txt\"";
+    }
+    static public void Sociology()
+    {
+        Category = "Sociology";
+        Delta.FileName = "\"Sociology.txt\"";
+    }
+    static public void Economics()
+    {
+        Category = "Economics";
+        Delta.FileName = "\"Economics.txt\"";
+    }
+
+    static public void ExportCatalogus()
+    {
+        Gamma.Suggest.Add(new Gamma.Suggestions("Refrain from pressing this button again"));
+        Gamma.Suggest.Add(new Gamma.Suggestions("to export to file."));
+        if (Save == true)
+        {
+            Save = false;
+        }
+        else
+        {
+            Save = true;
+        }
+    }
+
+    static public void ImportCatalogus()
+    {
+        New = false;
+        foreach (string line in File.ReadLines(Delta.FileName))
+        {
+            Delta.LineCount++;
+        }
+        Delta.ImportFile();
+    }
+
+    static public void NewRecord()
+    {
+        New = true;
+    }
+
+    static public void Echelon()
+    {
+        Gamma.Suggest.Clear();
+        if (Save == false)
+        {
+            if (New == true)
+            {
+                using (StreamWriter writer = File.AppendText(Delta.FileName))
+                {
+                    writer.WriteLine(Subject);
+                    writer.WriteLine(Personalia.Name);
+                    writer.WriteLine(Account);
+                    writer.WriteLine(Abstract);
+                    writer.WriteLine(Hypothesis);
+                    writer.WriteLine(DateTime.Now);
+                    writer.WriteLine(Title);
+                    writer.WriteLine(Content);
+                }
+            }
+            else if (Edit == false)
+            {
+                using (StreamWriter writer = File.AppendText(Delta.FileName))
+                {
+                    writer.WriteLine(Personalia.Name);
+                    writer.WriteLine(DateTime.Now);
+                    writer.WriteLine(Title);
+                    writer.WriteLine(Content);
+                }
+            }
+            else if (Edit == true)
+            {
+                using (StreamWriter writer = File.AppendText(Delta.FileName))
+                {
+                    writer.WriteLine(Subject);
+                    writer.WriteLine(Personalia.Name);
+                    writer.WriteLine(Account);
+                    writer.WriteLine(Abstract);
+                    writer.WriteLine(Hypothesis);
+                    writer.WriteLine(DateTime.Now);
+                    writer.WriteLine(Title);
+                    writer.WriteLine(Content);
+                }
+            }
+        }
+        // using var stream = await FileSystem.OpenAppPackageFileAsync("AboutAssets.txt");
+        // using var writer = new StreamWriter(stream);
+
+    }
+
+    static public void Local()
+    {
+        Gamma.Suggest.Clear();
+        if (Save == false)
+        {
+            if (New == true)
+            {
+                using (StreamWriter writer = File.AppendText(Delta.FileName))
+                {
+                    writer.WriteLine(Subject);
+                    writer.WriteLine(Personalia.Name);
+                    writer.WriteLine(Account);
+                    writer.WriteLine(Abstract);
+                    writer.WriteLine(Hypothesis);
+                    writer.WriteLine(DateTime.Now);
+                    writer.WriteLine(Title);
+                    writer.WriteLine(Content);
+                }
+            }
+            else if (Edit == false)
+            {
+                using (StreamWriter writer = File.AppendText(Delta.FileName))
+                {
+                    writer.WriteLine(DateTime.Now);
+                    writer.WriteLine(Title);
+                    writer.WriteLine(Content);
+                }
+            }
+            else if (Edit == true)
+            {
+                using (StreamWriter writer = File.AppendText(Delta.FileName))
+                {
+                    writer.WriteLine(Subject);
+                    writer.WriteLine(Account);
+                    writer.WriteLine(Abstract);
+                    writer.WriteLine(Hypothesis);
+                    writer.WriteLine(DateTime.Now);
+                    writer.WriteLine(Title);
+                    writer.WriteLine(Content);
+                }
+            }
+        }
+    }
+}
