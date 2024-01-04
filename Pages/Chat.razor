@@ -1,0 +1,77 @@
+@page "/chat"
+@using Omnidroid.Resources.Scripts.Settings
+@inject NavigationManager NM
+@using Omnidroid.Resources.Scripts
+@using Omnidroid.Resources.Scripts.Default
+
+<div hidden="@Interface.ToChat" class="center">
+        <button @onclick="@ToInterpreter">Back</button>
+            <h2>Chat</h2>
+            <p class="accent">@Oversight.Status</p>
+            <div hidden="@Interface.Suggestions">
+                @foreach (var suggestion in Gamma.Suggest)
+                {
+                    <p>@suggestion.TheSuggestion</p>
+                }
+            </div>
+    <div hidden="@Interface.Info">
+        <button @onclick="@Interface.Clear">Explanation</button>
+        <button @onclick="@Report">Update Logbook</button>
+    </div>
+        @foreach (var message in Administrator.Tab)
+        {
+            <div id="chat-message" style="align-self:@message.Align; text-align:@message.TextAlign;">
+                <p class="chat-timestamp">@message.Time</p>
+                <p class="chat-sender">@message.Sender</p>
+                <p class="chat-content">@message.Content</p>
+            </div>
+        }
+    <div class="chat-navigation">
+        <div class="chat-input">
+            <input @bind="Val" @bind:event="oninput" @onkeyup="@Send" />
+            <button class="btn-primary" @onclick="@Message">Send</button>
+        </div>
+        <div hidden="@Administrator.Options" class="chat-options">
+            <button class="btn-primary" @onclick="@Administrator.A">@Administrator.a</button>
+            <button class="btn-primary" @onclick="@Administrator.B">@Administrator.b</button>
+            <button class="btn-primary" @onclick="@Administrator.C">@Administrator.c</button>
+            <button class="btn-primary" @onclick="@Administrator.D">@Administrator.d</button>
+        </div>
+    </div>
+    </div>
+
+@code {
+    static public string Val { get; set; } = "";
+    protected override void OnInitialized()
+    {
+        Logbook.TheLogAuthority = "Chat";
+    }
+    static public void Message()
+    {
+        Administrator.Correspond();
+    }
+    private void Send(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            Message();
+        }
+    }
+    public void ToInterpreter()
+    {
+        Administrator.PrePreset = false;
+        Administrator.M = 0;
+        Administrator.Tab.Clear();
+        Interface.ToChat = false;
+        Interface.ToSettings = true;
+        NM.NavigateTo("/interpreter");
+    }
+
+    public void Report()
+    {
+        if (Logbook.Errata == true)
+        {
+            Logbook.AddError();
+        }
+    }
+}
