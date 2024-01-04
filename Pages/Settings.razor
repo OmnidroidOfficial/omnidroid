@@ -1,0 +1,325 @@
+@page "/settings"
+@using Omnidroid.Resources.Scripts
+@inject NavigationManager NM
+@using Omnidroid.Resources.Scripts.Default
+@using Omnidroid.Resources.Scripts.Settings
+
+    <div hidden="@Interface.ToSettings" class="center">
+    <h2>Settings</h2>
+    <h3 class="divider">Credentials</h3>
+    <select @onchange="@SetEdit">
+        @foreach (var option in Personalia.Add)
+        {
+            <option value="@option.Value">@option.Name</option>
+        }
+    </select>
+    <input hidden="Custom" @bind="@CS" @bind:event="oninput"/>
+    <button @onclick="@CredEdit">@Edit</button>
+    <button @onclick="@CredImport">Import</button>
+    <div hidden="@IS">
+        <select @onchange="@ImportSettings">
+            <option value="1">Echelon</option>
+            <option value="0">Local</option>
+        </select>
+    </div>
+    <h3 class="divider">Shortcode Interpreter</h3>
+    <input @bind="@Shortcode" @bind:event="oninput" @onkeyup="@Enter" />
+    <button @onclick="@SubstringShortcode">Enter</button>
+
+    @Authority
+    @Code
+    @Authorization.Issuer
+    @Authorization.SN
+    <h3 class="divider">Currency Sign</h3>
+    <button @onclick="@Ante">Before</button><button @onclick="@Post">After</button>
+    <h3 class="divider">Time Formatting</h3>
+    <table class="interactive">
+        <tr>
+            <td hidden="@a" @onclick="@A">@DateTime.Now.ToString(format: "d MMMM yyyy")</td>
+            <td hidden="@b" @onclick="@B">@DateTime.Now.ToString(format: "yyyy/MM/dd")</td>
+            <td hidden="@c" @onclick="@C">@DateTime.Now.ToString(format: "HH:mm")</td>
+            <td hidden="@d" @onclick="@D">@DateTime.Now.ToString(format: "hh:mm")</td>
+            <td hidden="@e" @onclick="@E">@DateTime.Now.ToString(format: "tt")</td>
+            <td hidden="@f" @onclick="@F">@DateTime.Now.ToString(format: "yyyy/MM/dd")</td>
+            <td hidden="@g" @onclick="@G">@DateTime.Now.ToString(format: "d MMMM yyyy")</td>
+        </tr>
+        <tr><td><p class="accent" @onclick="@Format">Save</p></td></tr>
+    </table>
+    
+    </div>
+
+@code {
+    static public bool IS { get; set; } = true;
+    static public bool Custom { get; set; } = true;
+    static public string Edit { get; set; } = "Edit";
+    static public string CS { get; set; } = "";
+    static public int SI { get; set; } = 0;
+    static public string Authority { get; set; } = "";
+    static public string Code { get; set; } = "ABC";
+    static public string Shortcode { get; set; } = "";
+    static public string FS { get; set; } = "format: yyyy/MM/dd hh:mm tt";
+    static public bool a { get; set; } = false;
+    static public bool b { get; set; } = false;
+    static public bool c { get; set; } = false;
+    static public bool d { get; set; } = false;
+    static public bool e { get; set; } = false;
+    static public bool f { get; set; } = false;
+    static public bool g { get; set; } = false;
+
+    protected override void OnInitialized()
+    {
+        Logbook.TheLogAuthority = "Settings";
+    }
+
+    static public void Enter(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            SubstringShortcode();
+        }
+    }
+
+    static public void ImportSettings(ChangeEventArgs e)
+    {
+
+        if (e.Value is not null)
+        {
+            SI = (int)e.Value;
+            if (SI == 0)
+            {
+                Authorization.ImportModus = 1;
+                Authorization.Credentials();
+            }
+            else
+            {
+                Custom = false;
+                Edit = "Save";
+            }
+        }
+    }
+
+    static public void SetEdit(ChangeEventArgs e)
+    {
+        if (e.Value is not null)
+        {
+            Personalia.Record = (string)e.Value;
+        }
+    }
+
+    static public void CredEdit()
+    {
+        if (Custom == true)
+        {
+            Authorization.ImportModus = 2;
+            Authorization.Credentials();
+            Oversight.Status = "Administration page prepared for edit.";
+        }
+        
+    }
+    static public void CredImport()
+    {
+        if (IS == true)
+        {
+            IS = false;
+        }
+        else
+        {
+            IS = true;
+        }
+    }
+
+    static public void Ante()
+    {
+        Journal.CurrencyLocation = Journal.CurrencyLocation1;
+    }
+
+    static public void Post()
+    {
+        Journal.CurrencyLocation = Journal.CurrencyLocation2;
+    }
+    static public void ClassifyAuthority()
+    {
+        if ((Authority != "ODD") || (Authority != "KAI") || (Authority != "LIB") || (Authority != "VAL"))
+        {
+            Oversight.Status = "The authority is not recognized.";
+            Logbook.TheLogErrorCode = "002";
+            Logbook.AddError();
+        }
+        else
+        {
+            ClassifyCode();
+        }
+    }
+
+    static public void ClassifyShortcode()
+    {
+        if (Authorization.Classified == false)
+        {
+            Authorization.Classified = true;
+            ClassifyAuthority();
+        }
+        else
+        {
+            Authorization.Classified = false;
+            Authorization.Issuer = Authority;
+            Authorization.SN = Code;
+            Authorization.Shortcode();
+        }
+    }
+    static public void SubstringShortcode()
+    {
+        if (Shortcode != "")
+        {
+            Authorization.TheShortcode = Shortcode;
+            Authority = Shortcode.Substring(0, 3);
+            Code = Shortcode.Substring(3, 3);
+            if (Code != null)
+            {
+                ClassifyShortcode();
+            }
+        }
+        else
+        {
+            Oversight.Status = "The field for shortcodes is empty.";
+        }
+    }
+
+    static public void Format()
+    {
+        FS = "format: ";
+        if (a == false)
+        {
+            FS.Concat("d MMMM yyyy");
+        }
+        if (b == false)
+        {
+            FS.Concat("yyyy/MM/dd");
+        }
+        if (c == false)
+        {
+            FS.Concat("hh:mm");
+        }
+        if (d == false)
+        {
+            FS.Concat("HH:mm");
+        }
+        if (e == false)
+        {
+            FS.Concat("tt");
+        }
+        if (e == false)
+        {
+            FS.Concat("yyyy/MM/dd");
+        }
+        if (f == false)
+        {
+            FS.Concat("d MMMM yyyy");
+        }
+    }
+
+    static public void A()
+    {
+        if (a == false)
+        {
+            a = true;
+        }
+        else
+        {
+            a = false;
+        }
+    }
+
+    static public void B()
+    {
+        if (b == false)
+        {
+            b = true;
+        }
+        else
+        {
+            b = false;
+        }
+    }
+
+    static public void C()
+    {
+        if (c == false)
+        {
+            c = true;
+        }
+        else
+        {
+            c = false;
+        }
+    }
+
+    static public void D()
+    {
+        if (d == false)
+        {
+            d = true;
+        }
+        else
+        {
+            d = false;
+        }
+    }
+
+    static public void E()
+    {
+        if (e == false)
+        {
+            e = true;
+        }
+        else
+        {
+            e = false;
+        }
+    }
+    static public void F()
+    {
+        if (f == false)
+        {
+            f = true;
+        }
+        else
+        {
+            f = false;
+        }
+    }
+    static public void G()
+    {
+        if (g == false)
+        {
+            g = true;
+        }
+        else
+        {
+            g = false;
+        }
+    }
+    static public void ClassifyCode()
+    {
+        Char[] _code = Code.Substring(0, 3).ToCharArray();
+        Char[] code = _code;
+        Char _code1 = code[0];
+        Char _code2 = code[1];
+        Char _code3 = code[2];
+        bool code1 = Char.IsNumber(_code1);
+        bool code2 = Char.IsNumber(_code2);
+        bool code3 = Char.IsNumber(_code3);
+
+        if ((code1 == true) && (code2 == true) && (code3 == true))
+        {
+            ClassifyShortcode();
+        }
+        else
+        {
+            Oversight.Status = "The shortcode is not recognized.";
+            Logbook.TheLogErrorCode = "003";
+            Logbook.AddError();
+        }
+    }
+    //log out
+    // logbook
+}
