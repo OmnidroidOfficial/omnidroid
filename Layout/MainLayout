@@ -1,0 +1,39 @@
+@inherits LayoutComponentBase
+@using Omnidroid.Resources.Scripts.Settings;
+
+<div class="page">
+        <main>
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+<div class="nav-sticky">
+    <div hidden="@Interface.MainMenu" class="nav-menu">
+        <NavMenu />
+    </div>
+    <div class="nav-bar">
+        <nav>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="notifications">
+                <div class="nav-content">
+                <p class="nav-content">Notifications</p>
+                </div>
+            </NavLink>
+        </div>
+        <div class="nav-item" @onclick="@Interface.DisplayMainMenu">
+            <div class="nav-content">
+                <i class="material-icons">view_module</i>
+            <p>Menu</p>
+            </div>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="settings">
+                <div class="nav-content">
+                <p>Settings</p>
+                </div>
+            </NavLink>
+        </div>
+        </nav>
+    </div>
+</div>
