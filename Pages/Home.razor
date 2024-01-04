@@ -62,7 +62,7 @@
     <h1>Processing...</h1>
     <p>@Oversight.Status</p>
     <div hidden="@Interface.Suggestions">
-        @foreach (var suggestion in Administrator.Suggest)
+        @foreach (var suggestion in Gamma.Suggest)
         {
             <p>@suggestion.TheSuggestion</p>
         }
@@ -134,7 +134,7 @@
     static public void SignedOut3()
     {
         Authorization.Cancel();
-        Administrator.Suggest.Clear();
+        Gamma.Suggest.Clear();
         Interface.Suggestions = true;
         Oversight.Auth = true;
         SignedOut = false;
