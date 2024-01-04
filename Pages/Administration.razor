@@ -1,0 +1,92 @@
+@page "/administration"
+@inject NavigationManager NM
+@using Omnidroid.Resources.Scripts.Settings
+@using Omnidroid.Resources.Scripts.Default
+<div class="center">
+    <h2>@Title</h2>
+    <h3>@Oversight.Status</h3>
+</div>
+<div hidden="@Constants">
+    <h3>Personalia</h3>
+    <p hidden="@More">@Personalia.Region</p>
+    <p>@Personalia.Country</p>
+    <p>@Personalia.Name</p>
+    <button hidden="@PersonaliAdd" @onclick="@LoadPersonalia">Load More</button>
+    <div hidden="@More">
+        @MorePersonalia
+    </div>
+</div>
+<div hidden="@Diary"></div>
+<div hidden="@EC" class="bottom">
+    <label>Favorite Color: <input @bind="@FC" @bind:event="oninput"/></label>
+    <p class="accent">@Text</p>
+    <textarea @bind="@Edit" @bind:event="oninput"/>
+    <button @onclick="@EditConstant"/>
+<selector id="options" name="options" @onchange="@Change">
+    <option value="2">Diary</option>
+    <option value="3">Constants</option>
+    <option value="1">Notifications</option>
+    </selector>
+    </div>
+@code {
+    static public string Edit { get; set; } = "";
+    static public string Title { get; set; } = "Administration";
+    static public bool More { get; set; } = true;
+    static public bool EC { get; set; } = Personalia.Edit;
+    static public int Administer { get; set; } = 3;
+    static public string Text = Personalia.Record;
+    static public string FC { get; set; } = ""; 
+    static public bool PersonaliAdd { get; set; } = false;
+    static public bool Diary { get; set; } = true;
+    static public bool Constants { get; set; } = true;
+    static public string MorePersonalia { get; set; } = Personalia.Credentials; 
+    protected override void OnInitialized()
+    {
+        Logbook.TheLogAuthority = "Administration";
+        if (EC == false)
+        {
+            Oversight.Status = "For verification, use your favorite color.";
+        }
+    }
+
+    static public void EditConstant()
+    {
+        
+    }
+
+    static public void TheChange()
+    {
+        switch (Administer)
+        {
+            case 3:
+                break;
+            case 1:
+                break;
+            case 2:
+                break;
+        }
+    }
+
+    static public void LoadPersonalia()
+    {
+        if (More == true)
+        {
+            PersonaliAdd = false;
+            More = true;
+        }
+        else
+        {
+            More = false;
+            PersonaliAdd = true;
+        }
+    }
+
+    static public void Change(ChangeEventArgs e)
+    {
+        if (e.Value is not null)
+        {
+            Administer = (int)e.Value;
+            TheChange();
+        }
+    }
+}
