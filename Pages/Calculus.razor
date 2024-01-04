@@ -1,0 +1,206 @@
+@page "/calculus"
+@using Omnidroid.Resources.Scripts
+@inject NavigationManager NM
+@using Omnidroid.Resources.Scripts.Settings
+@using Omnidroid.Resources.Scripts.Default
+<div>
+    <h2>@Title</h2>
+    <p class="accent">@Oversight.Status</p>
+    <div hidden="@Interface.Suggestions">
+        @foreach (var suggestion in Gamma.Suggest)
+        {
+            <p>@suggestion.TheSuggestion</p>
+        }
+    </div>
+    </div>
+    <div hidden="@Mode">
+        <div hidden="@AI">
+            @foreach (var info in Epsilon.Calculus)
+            {
+                <p class="accent">@info.Line</p>
+            }
+            </div>
+    <button hidden="@Introduction" @onclick="@I">Introduction</button>
+    <button @onclick="@SI">Sign Interpreter</button>
+    <button @onclick="@FI">Function Interpreter</button>
+    </div>
+    <div hidden="@Annotation" class="calculus">
+        <table>
+            <tr>
+                <td><sub><sub> @Locus</sub>@Divisio</sub></td>
+                <td><p class="accent">&ang;</p></td>
+                <td>@Indicator</td>
+                <td>@Data</td>
+            </tr>
+            <tr>
+                <td><p class="accent">=</p></td>
+            </tr>
+            <tr>@if (UnitMode == true)
+                {
+                @foreach (var unit in Converter.PostSign)
+                        {
+                    <td><sub><sub>@unit.Locus</sub>@unit.Divisio</sub></td>
+                    <td>@unit.Indicator</td>
+                    <td>@unit.Data</td>
+                        }
+                }
+            </tr>
+        </table>
+        </div>
+<div hidden="@Annotation" class="bottom" style="border-color: @Interface.FavoriteColor; border-top: 1px;">
+        <label>Function Name: <input @bind="@Title" @bind:event="oninput" /></label>
+        <table hidden="@NoQuantities" class="interactive">
+            <tr>
+                <td>E @Set</td>
+                <td>T @Set</td>
+                <td>I @Set</td>
+                <td>C @Set</td>
+                <td>M @Set</td>
+            </tr>
+        </table>
+        <table hidden="@NoUnits" class="interactive">
+            <tr>
+                <td>&alpha;</td>
+                <td>&beta;</td>
+                <td>&gamma;</td>
+                <td>&delta;</td>
+                <td>&epsilon;</td>
+            </tr>
+        </table>
+        <button @onclick="@PostSign">Unit Mode</button><button @onclick="@Properties">Properties</button>
+        <div hidden="@Property">
+            <label>Locus: <input @bind="@Locus" @bind:event="oninput" /></label>
+            <label>Divisio <input @bind="@Divisio" @bind:event="oninput" /></label>
+        </div>
+        <label>Indicator: <input @bind="@Indicator" @bind:event="oninput" /></label>
+        <label>Data: <textarea @bind="@Data" @bind:event="oninput" /></label>
+        <button @onclick="@Determined">@Set</button>
+        <button @onclick="@AddData">Add Data</button>
+        <button hidden="@NoUnits" @onclick="@AddUnit">Add Unit</button>
+        <button hidden="@Signs" @onclick="@Sign">Interpret</button>
+        <button hidden="@Functions" @onclick="@Function">Interpret</button>
+        <button @onclick="@ToConverter">@Converter.Proceeding</button>
+        <button>Export to iVal</button>
+    </div>
+@code {
+    static public string Set { get; set; } = "[~]";
+    static public bool UnitMode { get; set; } = false;
+    static public bool NoQuantities { get; set; } = false;
+    static public bool NoUnits { get; set; } = true;
+    static public bool Property { get; set; } = true;
+    static public string Indicator { get; set; } = "";
+    static public string Data { get; set; } = "";
+    static public string Divisio { get; set; } = "";
+    static public string Locus { get; set; } = "";
+    static public bool Selector { get; set; } = false;
+    static public bool AI { get; set; } = true;
+    static public bool Mode { get; set; } = false;
+    static public bool Annotation { get; set; } = true;
+    static public bool Signs { get; set; } = true;
+    static public bool Introduction { get; set; } = false;
+    static public bool Functions { get; set; } = true;
+    static public string ShortcodeInput { get; set; } = "";
+    static public string Title { get; set; } = "Calculus";
+
+    protected override void OnInitialized()
+    {
+        Logbook.TheLogAuthority = "Calculus";
+    }
+
+    static public void Determined()
+    {
+        switch (Set)
+        {
+            case "[~]":
+                Set = "{~}";
+                break;
+            case "{~}":
+                Set = "[~]";
+                break;
+        }
+    }
+
+    static public void Properties()
+    {
+        if (Property == true)
+        {
+            Property = false;
+        }
+        else
+        {
+            Property = true;
+        }
+    }
+
+    static public void PostSign()
+    {
+        NoQuantities = true;
+        NoUnits = false;
+        UnitMode = true;
+    }
+    static public void I()
+    {
+        Introduction = true;
+        AI = false;
+        Epsilon.AboutInterpreter();
+    }
+
+    static public void AddData()
+    {
+        Converter.PostSign.Add(new Converter.Cartesian(Divisio, Locus, Indicator, Data, UnitMode));
+    }
+
+    static public void AddUnit()
+    {
+        
+    }
+
+    static public void SI()
+    {
+        Mode = true;
+        Annotation = false;
+        Signs = false;
+    }
+
+    static public void FI()
+    {
+        Mode = true;
+        Annotation = false;
+        Functions = false;
+    }
+
+    static public void ToConverter()
+    {
+        if (Converter.Quantity != "")
+        {
+            if (Converter.SI == false)
+            {
+                Converter.ReadFunction();
+            }
+            else
+            {
+                Converter.ReadSign();
+            }
+        }
+    }
+
+    static public void Sign()
+    {
+        if (Converter.Quantity != "")
+        {
+            Converter.Modus = 0;
+            Converter.SI = true;
+            Converter.Read();
+        }
+    }
+
+    static public void Function()
+    {
+        if (Converter.Quantity != "")
+        {
+            Converter.Modus = 0;
+            Converter.SI = false;
+            Converter.Read();
+        }
+    }
+}
