@@ -1,0 +1,155 @@
+@page "/"
+@using Omnidroid.Resources.Scripts
+@using Omnidroid.Resources.Scripts.Settings
+@using Omnidroid.Resources.Scripts.Default
+<div class="center">
+    <h1 style="color:@Interface.FavoriteColor;">@Interface.Header</h1>
+</div>
+
+<div class="center" hidden="@SignedOut">
+    <h1>Welcome to Omnidroid.</h1>
+    <button @onclick="@SignIn">Sign In</button>
+    <p>or</p>
+    <button @onclick="@Registration">Continue your Registration</button>
+</div>
+
+<div class="center" hidden="@SignedIn">
+    <h1>@Interface.TF</h1>
+        <h2>Administration</h2>
+        <div>
+            <table>
+                <tr>
+                    <th>@OutgoingSummary</th>
+                    <th>@IncomingSummary</th>
+                </tr>
+                <tr>
+                    <td>@Import</td>
+                    <td>@Export</td>
+                </tr>
+            </table>
+        </div>
+</div>
+
+<div hidden="@iVal">
+    <iframe src="https://ival.the-echelon.cloud/"/>
+</div>
+
+<div hidden="@Interface.Config">
+    <div><button @onclick="@iValue">Open in iVal</button></div>
+    <div><button @onclick="@Continue">Or Continue</button></div>
+</div>
+
+<div class="center" hidden="@Oversight.SignIn">
+    <button @onclick="@SignedOut1">Back</button>
+    <h1>Sign In</h1>
+    <p>@Oversight.Status</p>
+    <label for="SignIn_ID">ID<input name="SignIn_ID"/></label>
+    <label for="SignIn_SecretPhrase">Secret Phrase<input name="SignIn_SecretPhrase" /></label>
+    <button @onclick="@Processing1">Submit</button>
+</div>
+
+<div class="center" hidden="@Oversight.Register">
+    <button @onclick="@SignedOut2">Back</button>
+    <h1>Your Registration</h1>
+    <p>@Oversight.Status</p>
+    <label for="Register_ColorFav">Favorite Color<input name="Register_ColorFav" /></label>
+    <label for="Register_Itinerary">Itinerary<input name="Register_Itinerary" /></label>
+    <button @onclick="@Processing2">Continue</button>
+</div>
+
+<div class="center" hidden="@Oversight.Auth">
+    <button @onclick="@SignedOut3">Back</button>
+    <h1>Processing...</h1>
+    <p>@Oversight.Status</p>
+    <div hidden="@Interface.Suggestions">
+        @foreach (var suggestion in Administrator.Suggest)
+        {
+            <p>@suggestion.TheSuggestion</p>
+        }
+    </div>
+    <div hidden="@Interface.Info">
+        <button @onclick="@Interface.Clear">Explanation</button>
+    </div>
+</div>
+
+
+@code{
+    static public bool SignedOut { get; set; } = true;
+    static public bool SignedIn { get; set; } = false;
+    static public bool iVal { get; set; } = true;
+    static public int IncomingSummary { get; set; }
+    static public int OutgoingSummary { get; set; }
+    static public string Import { get; set; } = Journal.ImportReference;
+    static public string Export { get; set; } = Journal.ExportReference;
+    static public int Ratio { get; set; }
+    static public int ExpenseIncoming { get; set; }
+    static public int ExpenseOutgoing { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (SignedIn == true)
+        {
+            Alpha.Summary();
+            IncomingSummary = Alpha.Incoming;
+            OutgoingSummary = Alpha.Outgoing;
+        }
+        Logbook.TheLogAuthority = "Index";
+    }
+
+    static public void Continue()
+    {
+        Interface.Config = true;
+        iVal = false;
+    }
+
+    static public void iValue()
+    {
+        // tab
+    }
+
+    static public void Processing1()
+    {
+        Oversight.Auth = false;
+        Authorization.Beta();
+    }
+
+    static public void Processing2()
+    {
+        Oversight.Auth = false;
+        Authorization.Registration();
+    }
+
+    static public void SignedOut1()
+    {
+        Oversight.SignIn = true;
+        SignedOut = false;
+    }
+
+    static public void SignedOut2()
+    {
+        Oversight.Register = true;
+        SignedOut = false;
+    }
+
+    static public void SignedOut3()
+    {
+        Authorization.Cancel();
+        Administrator.Suggest.Clear();
+        Interface.Suggestions = true;
+        Oversight.Auth = true;
+        SignedOut = false;
+    }
+
+    static public void SignIn()
+    {
+        SignedOut = true;
+        Oversight.SignIn = false;
+    }
+
+    static public void Registration()
+    {
+        SignedOut = true;
+        Oversight.Register = false;
+    }
+
+}
